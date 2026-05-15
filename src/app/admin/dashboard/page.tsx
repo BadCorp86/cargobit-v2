@@ -1,25 +1,47 @@
 "use client";
 
-import { toast } from "sonner";
-import { Sidebar } from "@/components/layout/sidebar";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { AdminDataTable } from "@/components/admin/data-table";
+
+type MeResponse = {
+  ok: boolean;
+  user?: { email: string; role: string; twoFAEnabled: boolean };
+};
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+  const [me, setMe] = useState<MeResponse | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d: MeResponse) => {
+        if (!d.ok) {
+          router.push("/admin/login");
+          return;
+        }
+        setMe(d);
+      })
+      .catch(() => router.push("/admin/login"));
+  }, [router]);
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/admin/login");
+    router.refresh();
+  }
+
   return (
-    <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-6 lg:grid-cols-[260px_1fr]">
-      <Sidebar />
-      <section className="space-y-6">
-        <div className="glass-card p-6">
-          <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-          <p className="mt-2 text-sm opacity-80">Premium UI + DataTable + Toast Engine.</p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Button variant="premium">Premium</Button>
-            <Button variant="glow" onClick={() => toast.success("CargoBit v2 notification works!")}>Toast Test</Button>
-            <Button variant="glass">Glass</Button>
-          </div>
+    <main className="mx-auto max-w-6xl space-y-6 p-6 md:p-10">
+      <section className="glass-card p-6">
+        <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
+        <p className="mt-2 text-sm opacity-80">
+          {me?.user ? `Eingeloggt als ${me.user.email} (${me.user.role})` : "Lade Benutzerdaten..."}
+        </p>
+        <div className="mt-4">
+          <Button variant="glass" onClick={logout}>Logout</Button>
         </div>
-        <AdminDataTable />
       </section>
     </main>
   );
