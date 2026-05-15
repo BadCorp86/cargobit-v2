@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --background: #06121c;
+  --foreground: #ffffff;
+  --card: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --primary: #1c7ed6;
+  --accent: #00d4ff;
+}
+
+.light {
+  --background: #f4f9ff;
+  --foreground: #09131c;
+  --card: rgba(255, 255, 255, 0.85);
+  --border: rgba(11, 60, 93, 0.15);
+  --primary: #1c7ed6;
+  --accent: #00d4ff;
+}
+
+html.dark { color-scheme: dark; }
+html.light { color-scheme: light; }
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(80% 50% at 50% -20%, rgba(0, 212, 255, 0.16), transparent),
+    linear-gradient(180deg, var(--background) 0%, color-mix(in srgb, var(--primary) 15%, var(--background)) 100%);
+  color: var(--foreground);
+}
+
+.glass-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  backdrop-filter: blur(16px);
+}
