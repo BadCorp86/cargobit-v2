@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { db } from "@/lib/db";
 import { signAccessToken } from "@/lib/auth";
+
+const JWT_SECRET = process.env.JWT_SECRET || "change_me_super_secure";
 
 export async function POST(req: Request) {
   try {
@@ -14,23 +17,29 @@ export async function POST(req: Request) {
     }
 
     const user = await db.user.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "Ungültige Zugangsdaten." }, { status: 401 });
-    }
+    if (!user) return NextResponse.json({ ok: false, error: "Ungültige Zugangsdaten." }, { status: 401 });
 
     const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) {
-      return NextResponse.json({ ok: false, error: "Ungültige Zugangsdaten." }, { status: 401 });
+    if (!valid) return NextResponse.json({ ok: false, error: "Ungültige Zugangsdaten." }, { status: 401 });
+
+    if (user.twoFAEnabled) {
+      const challenge = jwt.sign(
+        { sub: user.id, email: user.email, role: user.role, t: "2fa_challenge" },
+        JWT_SECRET,
+        { expiresIn: "5m" }
+      );
+
+      return NextResponse.json({
+        ok: true,
+        requires2FA: true,
+        challenge,
+      });
     }
 
-    const token = signAccessToken({
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    });
-
+    const token = signAccessToken({ sub: user.id, email: user.email, role: user.role });
     const res = NextResponse.json({
       ok: true,
+      requires2FA: false,
       user: { id: user.id, email: user.email, role: user.role, twoFAEnabled: user.twoFAEnabled },
     });
 
@@ -43,7 +52,7 @@ export async function POST(req: Request) {
     });
 
     return res;
-  } catch (e) {
+  } catch {
     return NextResponse.json({ ok: false, error: "Serverfehler beim Login." }, { status: 500 });
   }
 }

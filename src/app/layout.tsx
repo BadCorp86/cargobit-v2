@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { AppToaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "CargoBit v2",
@@ -20,7 +19,6 @@ export default function RootLayout({
           <div className="fixed bottom-4 right-4 z-50">
             <ThemeToggle />
           </div>
-          <AppToaster />
         </ThemeProvider>
       </body>
     </html>
