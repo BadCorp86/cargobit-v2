@@ -32,7 +32,6 @@ const columns: ColumnDef<Shipment>[] = [
   { accessorKey: "price", header: "Price (€)" },
 ];
 
-/* eslint-disable-next-line react-hooks/incompatible-library */
 export function AdminDataTable() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const table = useReactTable({
