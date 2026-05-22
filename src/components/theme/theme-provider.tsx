@@ -8,8 +8,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <NextThemesProvider
       attribute="class"
       defaultTheme="dark"
-      enableSystem={false}
+      enableSystem
       disableTransitionOnChange
+      storageKey="cargobit-theme"
       themes={["dark", "light"]}
     >
       {children}
